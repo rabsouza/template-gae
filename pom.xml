@@ -10,6 +10,7 @@
     <artifactId>arcadia-caller</artifactId>
 
     <properties>
+        <java.version>1.7</java.version>
         <app.id>arcadia-caller-dev</app.id>
         <app.version>1</app.version>
         <appengine.version>1.9.38</appengine.version>
@@ -20,7 +21,7 @@
         <org.slf4j-version>1.7.21</org.slf4j-version>
         <ch.qos.logback-version>1.1.7</ch.qos.logback-version>
         <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
-        <objectify.version>5.1.12</objectify.version>
+        <objectify.version>5.1.13</objectify.version>
         <hibernate-validator.version>5.1.3.Final</hibernate-validator.version>
         <validation-api.version>1.1.0.Final</validation-api.version>
         <javax.el-api.version>2.2.4</javax.el-api.version>
@@ -37,6 +38,8 @@
         <guava.version>19.0</guava.version>
         <commons-collections4.version>4.1</commons-collections4.version>
         <lombok.version>1.16.8</lombok.version>
+        <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
+        <jacoco-maven-plugin.version>0.7.7.201606060606</jacoco-maven-plugin.version>
     </properties>
 
     <prerequisites>
@@ -61,6 +64,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
+            <version>${org.springframework-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
             <version>${org.springframework-version}</version>
         </dependency>
 
@@ -138,6 +146,18 @@
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-stubs</artifactId>
+            <version>${appengine.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-labs</artifactId>
+            <version>${appengine.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-local-runtime</artifactId>
             <version>${appengine.version}</version>
             <scope>test</scope>
         </dependency>
@@ -230,11 +250,44 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/*IntegTest.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>jacoco-initialize</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-site</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <version>${maven-compiler-plugin.version}</version>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
             <plugin>

@@ -6,19 +6,16 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 
-import br.com.battista.arcadia.caller.model.User;
+import br.com.battista.arcadia.caller.config.OfyHelper;
 
-/**
- * Created by rabsouza on 26/06/16.
- */
 public abstract class BaseControllerConfig {
 
     private LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
     @BeforeClass
-    public static void startUp(){
+    public static void startUp() {
         ObjectifyService.begin();
-        ObjectifyService.register(User.class);
+        OfyHelper.register();
     }
 
     @Before

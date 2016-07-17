@@ -14,6 +14,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import br.com.battista.arcadia.caller.constants.EntityConstant;
+import br.com.battista.arcadia.caller.constants.ProfileAppConstant;
+import br.com.battista.arcadia.caller.exception.EntityAlreadyExistsException;
+import br.com.battista.arcadia.caller.exception.EntityNotFoundException;
 import br.com.battista.arcadia.caller.exception.RepositoryException;
 import br.com.battista.arcadia.caller.exception.ValidatorException;
 import br.com.battista.arcadia.caller.model.BaseEntity;
@@ -25,6 +28,8 @@ public class UserRepositoryTest extends BaseRepositoryConfig {
 
     private final String username = "abc0_";
     private final String mail = "abc@abc.com";
+    private final ProfileAppConstant profile = ProfileAppConstant.APP;
+    private final String mail02 = "mail02@abc.com";
 
     @Rule
     public ExpectedException rule = ExpectedException.none();
@@ -55,7 +60,7 @@ public class UserRepositoryTest extends BaseRepositoryConfig {
 
     @Test
     public void shouldSaveUserWhenValidUser() {
-        User user = User.builder().username(username).mail(mail).build();
+        User user = User.builder().username(username).mail(mail).profile(profile).build();
 
         User savedUser = userRepository.saveOrUpdateUser(user);
         assertNotNull(savedUser);
@@ -66,7 +71,7 @@ public class UserRepositoryTest extends BaseRepositoryConfig {
 
     @Test
     public void shouldFindByTokenWhenValidUserAndValidToken() {
-        User user = User.builder().username(username).mail(mail).build();
+        User user = User.builder().username(username).mail(mail).profile(profile).build();
 
         User savedUser = userRepository.saveOrUpdateUser(user);
         assertNotNull(savedUser);
@@ -74,16 +79,16 @@ public class UserRepositoryTest extends BaseRepositoryConfig {
         assertNotNull(savedUser.getCreatedAt());
         assertThat(savedUser.getVersion(), equalTo(EntityConstant.DEFAULT_VERSION));
 
-        User userToken = userRepository.findByToken(user.getToken());
-        assertNotNull(userToken);
-        assertThat(userToken.getPk(), equalTo(savedUser.getPk()));
-        assertThat(userToken.getVersion(), equalTo(savedUser.getVersion()));
-        assertThat(userToken.getToken(), equalTo(savedUser.getToken()));
+        User userFind = userRepository.findByToken(user.getToken());
+        assertNotNull(userFind);
+        assertThat(userFind.getPk(), equalTo(savedUser.getPk()));
+        assertThat(userFind.getVersion(), equalTo(savedUser.getVersion()));
+        assertThat(userFind.getToken(), equalTo(savedUser.getToken()));
     }
 
     @Test
     public void shouldReturnNullWhenFindByTokenWithValidUserAndInvalidToken() {
-        User user = User.builder().username(username).mail(mail).build();
+        User user = User.builder().username(username).mail(mail).profile(profile).build();
 
         User savedUser = userRepository.saveOrUpdateUser(user);
         assertNotNull(savedUser);
@@ -91,13 +96,13 @@ public class UserRepositoryTest extends BaseRepositoryConfig {
         assertNotNull(savedUser.getCreatedAt());
         assertThat(savedUser.getVersion(), equalTo(EntityConstant.DEFAULT_VERSION));
 
-        User userToken = userRepository.findByToken("abc");
-        assertNull(userToken);
+        User userFind = userRepository.findByToken("abc");
+        assertNull(userFind);
     }
 
     @Test
     public void shouldFindByUsernameWhenValidUserAndValidUsername() {
-        User user = User.builder().username(username).mail(mail).build();
+        User user = User.builder().username(username).mail(mail).profile(profile).build();
 
         User savedUser = userRepository.saveOrUpdateUser(user);
         assertNotNull(savedUser);
@@ -105,16 +110,16 @@ public class UserRepositoryTest extends BaseRepositoryConfig {
         assertNotNull(savedUser.getCreatedAt());
         assertThat(savedUser.getVersion(), equalTo(EntityConstant.DEFAULT_VERSION));
 
-        User userMail = userRepository.findByUsername(user.getUsername());
-        assertNotNull(userMail);
-        assertThat(userMail.getPk(), equalTo(savedUser.getPk()));
-        assertThat(userMail.getVersion(), equalTo(savedUser.getVersion()));
-        assertThat(userMail.getUsername(), equalTo(savedUser.getUsername()));
+        User userFind = userRepository.findByUsername(user.getUsername());
+        assertNotNull(userFind);
+        assertThat(userFind.getPk(), equalTo(savedUser.getPk()));
+        assertThat(userFind.getVersion(), equalTo(savedUser.getVersion()));
+        assertThat(userFind.getUsername(), equalTo(savedUser.getUsername()));
     }
 
     @Test
     public void shouldReturnNullWhenFindByUsernameWithValidUserAndInvalidUsername() {
-        User user = User.builder().username(username).mail(mail).build();
+        User user = User.builder().username(username).mail(mail).profile(profile).build();
 
         User savedUser = userRepository.saveOrUpdateUser(user);
         assertNotNull(savedUser);
@@ -122,18 +127,8 @@ public class UserRepositoryTest extends BaseRepositoryConfig {
         assertNotNull(savedUser.getCreatedAt());
         assertThat(savedUser.getVersion(), equalTo(EntityConstant.DEFAULT_VERSION));
 
-        User userMail = userRepository.findByUsername("abcd");
-        assertNull(userMail);
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenSaveUserWithInvalidUsername() {
-        User user = User.builder().username("abc").mail(mail).build();
-
-        rule.expect(RepositoryException.class);
-        rule.expectMessage(containsString("Invalid username!"));
-
-        userRepository.saveOrUpdateUser(user);
+        User userFind = userRepository.findByUsername("abcd");
+        assertNull(userFind);
     }
 
     @Test
@@ -183,6 +178,105 @@ public class UserRepositoryTest extends BaseRepositoryConfig {
         rule.expect(ValidatorException.class);
 
         userRepository.saveOrUpdateUser(new User());
+    }
+
+    @Test
+    public void shouldUpdateUserWhenValidUserAndValidUsername() {
+        User user = User.builder().username(username).mail(mail).profile(profile).build();
+
+        User savedUser = userRepository.saveOrUpdateUser(user);
+        assertNotNull(savedUser);
+        assertNotNull(savedUser.getPk());
+        assertNotNull(savedUser.getCreatedAt());
+        assertThat(savedUser.getVersion(), equalTo(EntityConstant.DEFAULT_VERSION));
+
+        User userFind = userRepository.findByUsername(user.getUsername());
+        assertNotNull(userFind);
+        assertThat(userFind.getPk(), equalTo(savedUser.getPk()));
+        assertThat(userFind.getVersion(), equalTo(savedUser.getVersion()));
+        assertThat(userFind.getUsername(), equalTo(savedUser.getUsername()));
+
+        User user02 = User.builder().username(username).mail(mail02).profile(profile).build();
+        user02.initEntity();
+        User updatedUser = userRepository.saveOrUpdateUser(user02);
+        assertThat(updatedUser.getPk(), equalTo(userFind.getPk()));
+        assertThat(updatedUser.getVersion(), equalTo(new Long(2L)));
+        assertThat(updatedUser.getUsername(), equalTo(userFind.getUsername()));
+        assertThat(updatedUser.getMail(),  equalTo(mail02));
+    }
+
+    @Test
+    public void shouldReturnExceptionWhenUpdateUserWithDifferentVersion() {
+        rule.expect(EntityAlreadyExistsException.class);
+
+        User user = User.builder().username(username).mail(mail).profile(profile).build();
+
+        User savedUser = userRepository.saveOrUpdateUser(user);
+        assertNotNull(savedUser);
+        assertNotNull(savedUser.getPk());
+        assertNotNull(savedUser.getCreatedAt());
+        assertThat(savedUser.getVersion(), equalTo(EntityConstant.DEFAULT_VERSION));
+
+        User userFind = userRepository.findByUsername(user.getUsername());
+        assertNotNull(userFind);
+        assertThat(userFind.getPk(), equalTo(savedUser.getPk()));
+        assertThat(userFind.getVersion(), equalTo(savedUser.getVersion()));
+        assertThat(userFind.getUsername(), equalTo(savedUser.getUsername()));
+
+        User user02 = User.builder().username(username).mail(mail02).profile(profile).build();
+        user02.initEntity();
+        user02.updateEntity();
+        userRepository.saveOrUpdateUser(user02);
+    }
+
+    @Test
+    public void shouldDeleteUserWhenValidUserAndValidUsername() {
+        User user = User.builder().username(username).mail(mail).profile(profile).build();
+
+        User savedUser = userRepository.saveOrUpdateUser(user);
+        assertNotNull(savedUser);
+        assertNotNull(savedUser.getPk());
+        assertNotNull(savedUser.getCreatedAt());
+        assertThat(savedUser.getVersion(), equalTo(EntityConstant.DEFAULT_VERSION));
+
+        User userFind = userRepository.findByUsername(user.getUsername());
+        assertNotNull(userFind);
+        assertThat(userFind.getPk(), equalTo(savedUser.getPk()));
+        assertThat(userFind.getVersion(), equalTo(savedUser.getVersion()));
+        assertThat(userFind.getUsername(), equalTo(savedUser.getUsername()));
+
+        User user02 = User.builder().username(username).mail(mail).profile(profile).build();
+        userRepository.deleteByUsername(user02);
+    }
+
+    @Test
+    public void shouldReturnExceptionWhenDeleteInvalidUsername() {
+        rule.expect(EntityNotFoundException.class);
+
+        User user = User.builder().username(username).mail(mail).profile(profile).build();
+
+        User savedUser = userRepository.saveOrUpdateUser(user);
+        assertNotNull(savedUser);
+        assertNotNull(savedUser.getPk());
+        assertNotNull(savedUser.getCreatedAt());
+        assertThat(savedUser.getVersion(), equalTo(EntityConstant.DEFAULT_VERSION));
+
+        User userFind = userRepository.findByUsername(user.getUsername());
+        assertNotNull(userFind);
+        assertThat(userFind.getPk(), equalTo(savedUser.getPk()));
+        assertThat(userFind.getVersion(), equalTo(savedUser.getVersion()));
+        assertThat(userFind.getUsername(), equalTo(savedUser.getUsername()));
+
+        User user02 = User.builder().username("abc").mail(mail).profile(profile).build();
+        userRepository.deleteByUsername(user02);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenDeleteNullUser() {
+        rule.expect(RepositoryException.class);
+        rule.expectMessage(containsString("not be null!"));
+
+        userRepository.deleteByUsername(null);
     }
 
 }

@@ -1,4 +1,4 @@
-package br.com.battista.arcadia.caller.controller;
+package br.com.battista.arcadia.caller.controller.advice;
 
 import static br.com.battista.arcadia.caller.builder.ResponseEntityBuilder.buildResponseErro;
 
@@ -8,11 +8,14 @@ import javax.validation.ConstraintViolationException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import br.com.battista.arcadia.caller.exception.AuthenticationException;
+import br.com.battista.arcadia.caller.exception.EntityAlreadyExistsException;
+import br.com.battista.arcadia.caller.exception.EntityNotFoundException;
 import br.com.battista.arcadia.caller.exception.RepositoryException;
 import br.com.battista.arcadia.caller.exception.ValidatorException;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,24 @@ public class AppControllerAdvice {
     public ResponseEntity<Map<String, Object>> handleUncaughtException(Exception e) {
         log.error(e.getLocalizedMessage(), e);
         return buildResponseErro(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        log.error(e.getLocalizedMessage(), e);
+        return buildResponseErro(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EntityAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadableException(EntityAlreadyExistsException e) {
+        log.error(e.getLocalizedMessage(), e);
+        return buildResponseErro(e, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadableException(EntityNotFoundException e) {
+        log.error(e.getLocalizedMessage(), e);
+        return buildResponseErro(e, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(AuthenticationException.class)

@@ -14,6 +14,16 @@
         <app.id>arcadia-caller-dev</app.id>
         <app.version>1</app.version>
         <appengine.version>1.9.38</appengine.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <sonar.exclusions>**/arcadia/caller/config/*,
+            **/arcadia/caller/controller/advice/*,
+            **/arcadia/caller/exception/*,
+            **/arcadia/caller/model/*,
+            **/arcadia/caller/builder/ResponseEntityBuilder.java
+        </sonar.exclusions>
+
         <org.springframework-version>3.2.16.RELEASE</org.springframework-version>
         <gcloud.plugin.version>2.0.9.74.v20150814</gcloud.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,7 +32,7 @@
         <ch.qos.logback-version>1.1.7</ch.qos.logback-version>
         <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
         <objectify.version>5.1.13</objectify.version>
-        <hibernate-validator.version>5.1.3.Final</hibernate-validator.version>
+        <hibernate-validator.version>4.3.1.Final</hibernate-validator.version>
         <validation-api.version>1.1.0.Final</validation-api.version>
         <javax.el-api.version>2.2.4</javax.el-api.version>
         <servlet-api.version>2.5</servlet-api.version>
@@ -46,6 +56,13 @@
         <maven>3.1.0</maven>
     </prerequisites>
 
+    <repositories>
+        <repository>
+            <id>SpringSource Enterprise Bundle Repositories</id>
+            <url>http://repository.springsource.com/maven/bundles/milestone</url>
+        </repository>
+    </repositories>
+
     <dependencies>
 
         <!-- Springs dependencies -->
@@ -64,11 +81,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>${org.springframework-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
             <version>${org.springframework-version}</version>
         </dependency>
 
@@ -161,6 +173,11 @@
             <version>${appengine.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${org.springframework-version}</version>
+        </dependency>
 
         <!-- AspectJ -->
         <dependency>
@@ -226,10 +243,12 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>version.properties</include>
+                    <include>swagger.properties</include>
                 </includes>
                 <filtering>true</filtering>
             </resource>
         </resources>
+
 
         <!-- for hot reload of the web application-->
         <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>

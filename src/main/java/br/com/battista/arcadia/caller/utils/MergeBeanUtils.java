@@ -7,32 +7,32 @@ import java.lang.reflect.InvocationTargetException;
 
 import br.com.battista.arcadia.caller.exception.AppException;
 
-/**
- * Created by rabsouza on 12/04/16.
- */
-public class MergeBeanUtils {
+public final class MergeBeanUtils {
 
-    public <M> void merge(M target, M destination) throws AppException {
+    private MergeBeanUtils() {
+    }
+
+    public static <M> void merge(M to, M from) {
         try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(target.getClass());
+            BeanInfo beanInfo = Introspector.getBeanInfo(to.getClass());
 
             // Iterate over all the attributes
             for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
-                processDescriptor(target, destination, descriptor);
+                processDescriptor(to, from, descriptor);
             }
         } catch (Exception e) {
             throw new AppException("Error to merge entities.", e);
         }
     }
 
-    private <M> void processDescriptor(M target, M destination, PropertyDescriptor descriptor) throws IllegalAccessException, InvocationTargetException {
+    private static <M> void processDescriptor(M to, M from, PropertyDescriptor descriptor) throws IllegalAccessException, InvocationTargetException {
         // Only copy writable attributes
         if (descriptor.getWriteMethod() != null) {
-            Object newValue = descriptor.getReadMethod().invoke(destination);
+            Object newValue = descriptor.getReadMethod().invoke(from);
 
-            // Only copy values values where the destination values is not null
+            // Only copy values values where the from values is not null
             if (newValue != null) {
-                descriptor.getWriteMethod().invoke(target, newValue);
+                descriptor.getWriteMethod().invoke(to, newValue);
             }
 
         }

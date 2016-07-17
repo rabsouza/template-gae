@@ -13,20 +13,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import br.com.battista.arcadia.caller.constants.ProfileAppConstant;
 import br.com.battista.arcadia.caller.exception.ValidatorException;
 import br.com.battista.arcadia.caller.model.User;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EntityValidatorTest {
 
-    @InjectMocks
-    private EntityValidator entityValidator;
-
-    @Spy
-    private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-
     @Rule
     public ExpectedException rule = ExpectedException.none();
+    @InjectMocks
+    private EntityValidator entityValidator;
+    @Spy
+    private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Test
     public void shouldErrorValidateWhenValidNullEntity() {
@@ -47,7 +46,7 @@ public class EntityValidatorTest {
 
     @Test
     public void shouldPassValidateWhenValidEntity() {
-        User build = User.builder().mail("abcdef@abc.com").username("abcdef").build();
+        User build = User.builder().mail("abcdef@abc.com").username("abcdef").profile(ProfileAppConstant.ADMIN).build();
 
         entityValidator.validate(build);
     }
